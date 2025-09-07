@@ -100,7 +100,7 @@ $window.Add_Closing({ if (-not $script:allowClose) { $_.Cancel = $true } })
 
 # Auto-close timer (30s)
 $timer = New-Object Windows.Threading.DispatcherTimer
-$timer.Interval = [TimeSpan]::FromSeconds(30)
+$timer.Interval = [TimeSpan]::FromMinutes(5)         
 $timer.Add_Tick({
     $timer.Stop()
     $script:allowClose = $true
