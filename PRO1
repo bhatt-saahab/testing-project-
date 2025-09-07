@@ -78,7 +78,6 @@ Add-Type -AssemblyName PresentationFramework
                    FontWeight="Bold"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"/>
-
         <!-- Sub Headline at Bottom -->
         <TextBlock Text="This Hacked"
                    Foreground="White"
@@ -92,10 +91,26 @@ Add-Type -AssemblyName PresentationFramework
 "@
 
 # Load XAML
-$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$reader = New-Object System.Xml.XmlNodeReader $xaml
 $window = [Windows.Markup.XamlReader]::Load($reader)
 
-# Show the window
+# Block manual close
+$script:allowClose = $false
+$window.Add_Closing({ if (-not $script:allowClose) { $_.Cancel = $true } })
+
+# Auto-close timer (30s)
+$timer = New-Object Windows.Threading.DispatcherTimer
+$timer.Interval = [TimeSpan]::FromSeconds(30)
+$timer.Add_Tick({
+    $timer.Stop()
+    $script:allowClose = $true
+    $window.Close()
+})
+
+# Start timer when window shows
+$window.Add_SourceInitialized({ $timer.Start() })
+
+# Show window
 $window.ShowDialog() | Out-Null
 ----------------------------------------------------------------------------------------------------------
 🟢Save the file on your pendrive as:
