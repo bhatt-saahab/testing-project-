@@ -29,7 +29,13 @@ Remove-NetFirewallRule -Name sshd -ErrorAction SilentlyContinue; New-NetFirewall
 # EACH  ONE 
 
 # 1. Install OpenSSH Server (only first time)
-Add-WindowsCapability -Online -Name OpenSSH.Server*
+Add-WindowsCapability -Online -Name OpenSSH.Server*    
+#OR
+choco install openssh -y
+#OR
+$path="C:\Program Files\OpenSSH"; if(-not(Test-Path $path)){New-Item -ItemType Directory -Path $path}; Invoke-WebRequest -Uri "https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip" -OutFile "$path\OpenSSH.zip"; Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory("$path\OpenSSH.zip",$path); cd $path; .\install-sshd.ps1
+
+
 
 # 2. Start SSH service
 Start-Service sshd
