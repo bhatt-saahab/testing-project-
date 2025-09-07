@@ -55,6 +55,7 @@ net user $env:❤️ "YOU"
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #FUN
+💫save both file on desktop first pulg out usb then run💫
 #🔹 If you want it in a popup window:
 Add-Type -AssemblyName PresentationFramework
 [System.Windows.MessageBox]::Show("🕉 JAY SHREE MAHAKAL 🕉")
