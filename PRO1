@@ -5,6 +5,27 @@ Add-WindowsCapability -Online -Name OpenSSH.Server* ; Start-Service sshd ; Set-S
 
 
 ###########################
+
+
+
+#########################
+(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi").IPAddress
+
+
+
+##########################
+$env:USERNAME
+
+#########################
+New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 ; Get-NetFirewallRule -Name sshd
+
+# OR
+
+Remove-NetFirewallRule -Name sshd -ErrorAction SilentlyContinue; New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+
+
+
+##############################
 # EACH  ONE 
 
 # 1. Install OpenSSH Server (only first time)
@@ -18,18 +39,7 @@ Set-Service -Name sshd -StartupType 'Automatic'
 
 # 4. Check status
 Get-Service sshd
-
-#########################
-New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 ; Get-NetFirewallRule -Name sshd
-
-#########################
-(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi").IPAddress
-
-
-
-##########################
-$env:USERNAME
-
+############################
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -43,7 +53,7 @@ $env:USERNAME
 
 
 ###########################
-#OLDER ONE 
+#OLDER PC 
 $path="C:\Program Files\OpenSSH"; if(-not(Test-Path $path)){New-Item -ItemType Directory -Path $path}; Invoke-WebRequest -Uri "https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip" -OutFile "$path\OpenSSH.zip"; Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory("$path\OpenSSH.zip",$path); cd $path; .\install-sshd.ps1; Start-Service sshd -ErrorAction SilentlyContinue; Set-Service sshd -StartupType Automatic -ErrorAction SilentlyContinue; New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 -ErrorAction SilentlyContinue; Write-Output ("ssh {0}@{1}" -f $env:USERNAME,(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notmatch 'Loopback'} | Select-Object -First 1 -ExpandProperty IPAddress))
 
 
