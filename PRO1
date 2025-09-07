@@ -1,4 +1,4 @@
-# ONE SINGAL COMAMND
+(1)          # ONE SINGAL COMAMND
 Add-WindowsCapability -Online -Name OpenSSH.Server* ; Start-Service sshd ; Set-Service sshd -StartupType Automatic ; New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 -ErrorAction SilentlyContinue ; Write-Output ("ssh {0}@{1}" -f $env:USERNAME,(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notmatch 'Loopback'} | Select-Object -First 1 -ExpandProperty IPAddress))
 
 
@@ -9,15 +9,15 @@ Add-WindowsCapability -Online -Name OpenSSH.Server* ; Start-Service sshd ; Set-S
 
 
 #########################
-(Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi").IPAddress
+(2)               (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi").IPAddress
 
 
 
 ##########################
-$env:USERNAME
+(3)                          $env:USERNAME
 
 #########################
-New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 ; Get-NetFirewallRule -Name sshd
+(4)                             New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 ; Get-NetFirewallRule -Name sshd
 
 # OR
 
@@ -26,7 +26,7 @@ Remove-NetFirewallRule -Name sshd -ErrorAction SilentlyContinue; New-NetFirewall
 
 
 ##############################
-# EACH  ONE 
+(5)           # EACH  ONE 
 
 # 1. Install OpenSSH Server (only first time)
 Add-WindowsCapability -Online -Name OpenSSH.Server*    
@@ -47,7 +47,7 @@ Set-Service -Name sshd -StartupType 'Automatic'
 Get-Service sshd
 ############################
 
-#PASSWORD CHANGED 
+(6)                       #PASSWORD CHANGED 
 net user $env:❤️ "YOU"
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
