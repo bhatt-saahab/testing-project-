@@ -34,33 +34,108 @@ Add-WindowsCapability -Online -Name OpenSSH.Server*
 choco install openssh -y
 #OR
 $path="C:\Program Files\OpenSSH"; if(-not(Test-Path $path)){New-Item -ItemType Directory -Path $path}; Invoke-WebRequest -Uri "https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip" -OutFile "$path\OpenSSH.zip"; Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory("$path\OpenSSH.zip",$path); cd $path; .\install-sshd.ps1
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
 # 2. Start SSH service
 Start-Service sshd
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # 3. Make SSH start automatically on boot
 Set-Service -Name sshd -StartupType 'Automatic'
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # 4. Check status
 Get-Service sshd
 ############################
-
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 (6)                       #PASSWORD CHANGED 
 net user $env:❤️ "YOU"
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#FUN
+#🔹 If you want it in a popup window:
+Add-Type -AssemblyName PresentationFramework
+[System.Windows.MessageBox]::Show("🕉 JAY SHREE MAHAKAL 🕉")
+----------------------------------------------------------------------------
+#PENDRIVE SCRIPT RUN
+🟢 Step 1: Create the PowerShell Script
+🟢1.Open Notepad
+🟢2.Paste this code:
+Add-Type -AssemblyName PresentationFramework
+
+# Create Fullscreen WPF Window
+[xml]$xaml = @"
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        WindowStyle="None" ResizeMode="NoResize"
+        WindowState="Maximized" Background="Black" Topmost="True">
+    <Grid>
+        <!-- Main Big Text -->
+        <TextBlock Text="JAY MAHAKAL"
+                   Foreground="Red"
+                   FontSize="130"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+
+        <!-- Sub Headline at Bottom -->
+        <TextBlock Text="This Hacked"
+                   Foreground="White"
+                   FontSize="40"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,40"/>
+    </Grid>
+</Window>
+"@
+
+# Load XAML
+$reader = (New-Object System.Xml.XmlNodeReader $xaml)
+$window = [Windows.Markup.XamlReader]::Load($reader)
+
+# Show the window
+$window.ShowDialog() | Out-Null
+----------------------------------------------------------------------------------------------------------
+🟢Save the file on your pendrive as:
+
+hacked.ps1    
+🟢(Choose All Files in "Save as type").
+
+---------------------------------------------------------------------------------------------------------
+
+
+🟢 Step 2: Create the Batch File
+
+🟢Open Notepad again.
+
+🟢Paste this code:
+
+@echo off
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0hacked.ps1"
+
+
+🟢Save this file on your pendrive as:
+
+RunHacked.bat
+
+
+(Choose All Files again).
+
+🟢 Step 3: Run It
+
+🟢Plug in the pendrive
+
+🟢Open the folder
+
+🟢Double-click RunHacked.bat
+
+🎉 A black window with BIG RED HACKED will appear in the middle of your screen     (EXIT FULL SCREEN ALT + A4) (TRY CTRL + C) 
 
 
 
-
-
-
-
-
-
-
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ###########################
 #OLDER PC 
