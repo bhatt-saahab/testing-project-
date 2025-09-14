@@ -81,6 +81,25 @@ New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled Tru
 Write-Output ("ssh {0}@{1}" -f $env:USERNAME,(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notmatch 'Loopback'} | Select-Object -First 1 -ExpandProperty IPAddress))
 
 
+----------------------------------------------------------------------------------
+NEW OLD PC 
+if((Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH.Server*').State -eq 'NotPresent'){
+    $path="C:\Program Files\OpenSSH"
+    if(Test-Path "$path\OpenSSH-Win64"){ Remove-Item "$path\OpenSSH-Win64" -Recurse -Force }
+    if(-not(Test-Path $path)){ New-Item -ItemType Directory -Path $path | Out-Null }
+    $zip="$path\OpenSSH.zip"
+    Invoke-WebRequest -Uri "https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip" -OutFile $zip
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($zip,$path)
+    cd "$path\OpenSSH-Win64"
+    .\install-sshd.ps1
+} else {
+    Add-WindowsCapability -Online -Name OpenSSH.Server* -ErrorAction SilentlyContinue
+}
+Start-Service sshd -ErrorAction SilentlyContinue
+Set-Service sshd -StartupType Automatic -ErrorAction SilentlyContinue
+New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 -ErrorAction SilentlyContinue
+Write-Output ("ssh {0}@{1}" -f $env:USERNAME,(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -notmatch 'Loopback'} | Select-Object -First 1 -ExpandProperty IPAddress))
 
 
 
