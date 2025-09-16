@@ -1,153 +1,149 @@
 # PowerShell script to install, configure, and display SSH connection details
 
 # 1. Install OpenSSH Server (try each method until one succeeds)
-
 $installSuccess = $false
 
 # Attempt 1: Using Add-WindowsCapability
-
 try {
-Write-Host "Attempting to install OpenSSH Server via Add-WindowsCapability..."
-Add-WindowsCapability -Online -Name OpenSSH.Server* -ErrorAction Stop
-$installSuccess = $true
-Write-Host "OpenSSH Server installed successfully via Add-WindowsCapability."
+    Write-Host "Attempting to install OpenSSH Server via Add-WindowsCapability..."
+    Add-WindowsCapability -Online -Name OpenSSH.Server* -ErrorAction Stop
+    $installSuccess = $true
+    Write-Host "OpenSSH Server installed successfully via Add-WindowsCapability."
 }
 catch {
-Write-Host "Add-WindowsCapability failed: $_"
+    Write-Host "Add-WindowsCapability failed: $_"
 }
 
 # Attempt 2: Using Chocolatey (if first attempt failed)
-
 if (-not $installSuccess) {
-try {
-Write-Host "Attempting to install OpenSSH Server via Chocolatey..."
-if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
-Write-Host "Chocolatey not found. Installing Chocolatey..."
-Set-ExecutionPolicy Bypass -Scope Process -Force
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-}
-choco install openssh -y -ErrorAction Stop
-$installSuccess = $true
-Write-Host "OpenSSH Server installed successfully via Chocolatey."
-}
-catch {
-Write-Host "Chocolatey installation failed: $_"
-}
+    try {
+        Write-Host "Attempting to install OpenSSH Server via Chocolatey..."
+        if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+            Write-Host "Chocolatey not found. Installing Chocolatey..."
+            Set-ExecutionPolicy Bypass -Scope Process -Force
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+        }
+        choco install openssh -y -ErrorAction Stop
+        $installSuccess = $true
+        Write-Host "OpenSSH Server installed successfully via Chocolatey."
+    }
+    catch {
+        Write-Host "Chocolatey installation failed: $_"
+    }
 }
 
 # Attempt 3: Manual download and install (if previous attempts failed)
-
 if (-not $installSuccess) {
-try {
-Write-Host "Attempting to install OpenSSH Server via manual download..."
-$path = "C:\Program Files\OpenSSH"
-if (-not (Test-Path $path)) {
-New-Item -ItemType Directory -Path $path -Force | Out-Null
-}
-$zipUrl = "https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip"
-$zipPath = "$path\OpenSSH.zip"
-Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -ErrorAction Stop
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-[System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $path)
-Set-Location $path
-& .\install-sshd.ps1
-$installSuccess = $true
-Write-Host "OpenSSH Server installed successfully via manual download."
-}
-catch {
-Write-Host "Manual installation failed: $_"
-}
+    try {
+        Write-Host "Attempting to install OpenSSH Server via manual download..."
+        $path = "C:\Program Files\OpenSSH"
+        if (-not (Test-Path $path)) {
+            New-Item -ItemType Directory -Path $path -Force | Out-Null
+        }
+        $zipUrl = "https://github.com/PowerShell/Win32-OpenSSH/releases/latest/download/OpenSSH-Win64.zip"
+        $zipPath = "$path\OpenSSH.zip"
+        Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath -ErrorAction Stop
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $path)
+        Set-Location $path
+        & .\install-sshd.ps1
+        $installSuccess = $true
+        Write-Host "OpenSSH Server installed successfully via manual download."
+    }
+    catch {
+        Write-Host "Manual installation failed: $_"
+    }
 }
 
 # Exit if installation failed
-
 if (-not $installSuccess) {
-Write-Host "All installation attempts failed. Exiting script."
-exit 1
+    Write-Host "All installation attempts failed. Exiting script."
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 2. Start SSH service
-
 try {
-Write-Host "Starting SSH service..."
-Start-Service sshd -ErrorAction Stop
-Write-Host "SSH service started successfully."
+    Write-Host "Starting SSH service..."
+    Start-Service sshd -ErrorAction Stop
+    Write-Host "SSH service started successfully."
 }
 catch {
-Write-Host "Failed to start SSH service: $_"
-exit 1
+    Write-Host "Failed to start SSH service: $_"
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 3. Set SSH service to start automatically on boot
-
 try {
-Write-Host "Setting SSH service to start automatically..."
-Set-Service -Name sshd -StartupType 'Automatic' -ErrorAction Stop
-Write-Host "SSH service set to automatic startup."
+    Write-Host "Setting SSH service to start automatically..."
+    Set-Service -Name sshd -StartupType 'Automatic' -ErrorAction Stop
+    Write-Host "SSH service set to automatic startup."
 }
 catch {
-Write-Host "Failed to set SSH service to automatic: $_"
-exit 1
+    Write-Host "Failed to set SSH service to automatic: $_"
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 4. Check SSH service status
-
 try {
-Write-Host "Checking SSH service status..."
-$serviceStatus = Get-Service sshd -ErrorAction Stop
-Write-Host "SSH Service Status: $($serviceStatus.Status)"
+    Write-Host "Checking SSH service status..."
+    $serviceStatus = Get-Service sshd -ErrorAction Stop
+    Write-Host "SSH Service Status: $($serviceStatus.Status)"
 }
 catch {
-Write-Host "Failed to check SSH service status: $_"
-exit 1
+    Write-Host "Failed to check SSH service status: $_"
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 5. Configure firewall rule for SSH
-
 try {
-Write-Host "Configuring firewall rule for SSH..."
-Remove-NetFirewallRule -Name sshd -ErrorAction SilentlyContinue
-New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 -ErrorAction Stop
-Write-Host "Firewall rule for SSH configured successfully."
+    Write-Host "Configuring firewall rule for SSH..."
+    Remove-NetFirewallRule -Name sshd -ErrorAction SilentlyContinue
+    New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 -ErrorAction Stop
+    Write-Host "Firewall rule for SSH configured successfully."
 }
 catch {
-Write-Host "Failed to configure firewall rule: $_"
-exit 1
+    Write-Host "Failed to configure firewall rule: $_"
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 6. Get IP address (prefer Wi-Fi, fallback to other interfaces)
-
 $ipAddress = $null
 try {
-Write-Host "Retrieving IP address..."
-$ipAddress = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi" -ErrorAction SilentlyContinue).IPAddress
-if (-not $ipAddress) {
-$ipAddress = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $.InterfaceAlias -notlike "Loopback*" } | Select-Object -First 1).IPAddress
-}
-if (-not $ipAddress) {
-throw "No valid IPv4 address found."
-}
-Write-Host "IP Address: $ipAddress"
+    Write-Host "Retrieving IP address..."
+    $ipAddress = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Wi-Fi" -ErrorAction SilentlyContinue).IPAddress
+    if (-not $ipAddress) {
+        $ipAddress = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike "Loopback*" } | Select-Object -First 1).IPAddress
+    }
+    if (-not $ipAddress) {
+        throw "No valid IPv4 address found."
+    }
+    Write-Host "IP Address: $ipAddress"
 }
 catch {
-Write-Host "Failed to retrieve IP address: $"
-exit 1
+    Write-Host "Failed to retrieve IP address: $_"
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 7. Get username
-
 try {
-$username = $env:USERNAME
-Write-Host "Username: $username"
+    $username = $env:USERNAME
+    Write-Host "Username: $username"
 }
 catch {
-Write-Host "Failed to retrieve username: $_"
-exit 1
+    Write-Host "Failed to retrieve username: $_"
+    Read-Host "Press Enter to exit..."
+    exit 1
 }
 
 # 8. Print SSH connection string
-
 Write-Host "SSH connection string: $username@$ipAddress"
 
-Read-Host -Prompt "Press Enter to exit..."
+# Keep console open to view output
+Read-Host "Press Enter to exit..."
