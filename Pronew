@@ -1,4 +1,4 @@
-```powershell
+
 # PowerShell script to install, configure, and display SSH connection details
 # This script includes enhanced error handling and automatic fixes for common issues, such as registering the sshd service if it's missing after installation.
 
