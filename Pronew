@@ -1,4 +1,14 @@
+```powershell
 # PowerShell script to install, configure, and display SSH connection details
+# This script includes enhanced error handling and automatic fixes for common issues, such as registering the sshd service if it's missing after installation.
+
+# Ensure script is running as Administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "This script requires administrative privileges. Please run as Administrator."
+    Read-Host "Press Enter to exit..."
+    exit 1
+}
 
 # 1. Install OpenSSH Server (try each method until one succeeds)
 $installSuccess = $false
@@ -6,7 +16,7 @@ $installSuccess = $false
 # Attempt 1: Using Add-WindowsCapability
 try {
     Write-Host "Attempting to install OpenSSH Server via Add-WindowsCapability..."
-    Add-WindowsCapability -Online -Name OpenSSH.Server* -ErrorAction Stop
+    Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 -ErrorAction Stop
     $installSuccess = $true
     Write-Host "OpenSSH Server installed successfully via Add-WindowsCapability."
 }
@@ -61,6 +71,41 @@ if (-not $installSuccess) {
     Write-Host "All installation attempts failed. Exiting script."
     Read-Host "Press Enter to exit..."
     exit 1
+}
+
+# Verify sshd service exists before proceeding (auto-fix if missing)
+try {
+    Write-Host "Verifying sshd service exists..."
+    $service = Get-Service -Name sshd -ErrorAction Stop
+    Write-Host "sshd service found: $($service.DisplayName)"
+}
+catch {
+    Write-Host "sshd service not found. Attempting to automatically register..."
+    try {
+        $path = "C:\Program Files\OpenSSH"
+        if (Test-Path "$path\sshd.exe") {
+            Set-Location $path
+            & .\install-sshd.ps1
+            Write-Host "sshd service registered successfully."
+        } else {
+            throw "OpenSSH binaries not found at $path. Please ensure installation was successful."
+        }
+    }
+    catch {
+        Write-Host "Failed to register sshd service: $_"
+        Read-Host "Press Enter to exit..."
+        exit 1
+    }
+    # Re-verify after auto-fix
+    try {
+        $service = Get-Service -Name sshd -ErrorAction Stop
+        Write-Host "sshd service found after registration: $($service.DisplayName)"
+    }
+    catch {
+        Write-Host "sshd service still not found after auto-fix: $_"
+        Read-Host "Press Enter to exit..."
+        exit 1
+    }
 }
 
 # 2. Start SSH service
@@ -147,3 +192,4 @@ Write-Host "SSH connection string: $username@$ipAddress"
 
 # Keep console open to view output
 Read-Host "Press Enter to exit..."
+```
